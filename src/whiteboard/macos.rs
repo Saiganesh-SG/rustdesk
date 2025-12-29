@@ -2,7 +2,7 @@ use super::{server::EVENT_PROXY, Cursor, CustomEvent, Ripple};
 use core_graphics::context::CGContextRef;
 use foreign_types::ForeignTypeRef;
 use hbb_common::{bail, log, ResultType};
-use objc::{class, msg_send, runtime::Object, sel, sel_impl};
+use objc::{class, msg_send, runtime::Object, sel};
 use piet::{
     kurbo::{BezPath, Point},
     FontFamily, RenderContext, Text, TextLayout, TextLayoutBuilder,
