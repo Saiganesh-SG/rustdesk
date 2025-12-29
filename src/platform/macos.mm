@@ -68,7 +68,9 @@ extern "C" bool InputMonitoringAuthStatus(bool prompt) {
     #endif
 }
 
-extern "C" bool Elevate(char* process, char** args) {
+// Check if the user can obtain admin authorization without actually executing anything.
+// This avoids using the deprecated AuthorizationExecuteWithPrivileges API.
+extern "C" bool MacCheckAdminAuthorization() {
     AuthorizationRef authRef;
     OSStatus status;
 
@@ -86,27 +88,10 @@ extern "C" bool Elevate(char* process, char** args) {
                                 kAuthorizationFlagPreAuthorize |
                                 kAuthorizationFlagExtendRights;
     status = AuthorizationCopyRights(authRef, &authRights, kAuthorizationEmptyEnvironment, flags, NULL);
-    if (status != errAuthorizationSuccess) {
-        printf("Failed to authorize\n");
-        return false;
-    }
-
-    if (process != NULL) {
-        FILE *pipe = NULL;
-        status = AuthorizationExecuteWithPrivileges(authRef, process, kAuthorizationFlagDefaults, args, &pipe);
-        if (status != errAuthorizationSuccess) {
-            printf("Failed to run as root\n");
-            AuthorizationFree(authRef, kAuthorizationFlagDefaults);
-            return false;
-        }
-    }
-
+    
+    bool result = (status == errAuthorizationSuccess);
     AuthorizationFree(authRef, kAuthorizationFlagDefaults);
-    return true;
-}
-
-extern "C" bool MacCheckAdminAuthorization() {
-    return Elevate(NULL, NULL);
+    return result;
 }
 
 // https://gist.github.com/briankc/025415e25900750f402235dbf1b74e42
