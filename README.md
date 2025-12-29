@@ -19,6 +19,8 @@ Chat with us: [Discord](https://discord.gg/nDceKgxnkV) | [Twitter](https://twitt
 
 Yet another remote desktop solution, written in Rust. Works out of the box with no configuration required. You have full control of your data, with no concerns about security. You can use our rendezvous/relay server, [set up your own](https://rustdesk.com/server), or [write your own rendezvous/relay server](https://github.com/rustdesk/rustdesk-server-demo).
 
+**NEW:** [Command-Line Interface (CLI)](#command-line-interface-cli) now available for server environments!
+
 ![image](https://user-images.githubusercontent.com/71636191/171661982-430285f0-2e12-4b1d-9957-4a58e375304d.png)
 
 RustDesk welcomes contribution from everyone. See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for help getting started.
@@ -179,4 +181,42 @@ Please ensure that you run these commands from the root of the RustDesk reposito
 ![File Transfer](https://github.com/rustdesk/rustdesk/assets/28412477/39511ad3-aa9a-4f8c-8947-1cce286a46ad)
 
 ![TCP Tunneling](https://github.com/rustdesk/rustdesk/assets/28412477/78e8708f-e87e-4570-8373-1360033ea6c5)
+
+
+
+## Command-Line Interface (CLI)
+
+RustDesk now includes a command-line interface for terminal-based remote access. Perfect for:
+- Server management without GUI
+- Automated remote system administration
+- SSH-like remote shell access
+- Headless system control
+
+### Quick Start
+
+Build the CLI:
+```bash
+./build_cli.sh    # Linux/macOS
+build_cli.bat     # Windows
+```
+
+Connect to a remote system:
+```bash
+./rustdeskcli --remoteId <REMOTE_ID> --idServer <SERVER> --key <KEY>
+```
+
+Once connected, you get an interactive terminal where you can execute commands on the remote system.
+
+### Documentation
+
+- [CLI README](CLI_README.md) - Complete guide and usage
+- [CLI Examples](CLI_EXAMPLES.md) - Example commands and use cases
+
+### Features
+
+- 🖥️ Interactive terminal sessions
+- ⚡ Real-time command execution
+- 🔐 Secure authentication
+- 🌐 Custom server support
+- 💻 Cross-platform (Linux, macOS, Windows)
 
