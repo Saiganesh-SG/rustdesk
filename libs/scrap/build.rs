@@ -79,14 +79,90 @@ fn link_homebrew_m1(name: &str) -> PathBuf {
     let target_os = std::env::var("CARGO_CFG_TARGET_OS").unwrap();
     let target_arch = std::env::var("CARGO_CFG_TARGET_ARCH").unwrap();
     if target_os != "macos" || target_arch != "aarch64" {
-        panic!("Couldn't find VCPKG_ROOT, also can't fallback to homebrew because it's only for macos aarch64.");
+        panic!(
+            "\n\n\
+            ════════════════════════════════════════════════════════════════════════════════\n\
+            Build Error: Missing Dependencies\n\
+            ════════════════════════════════════════════════════════════════════════════════\n\
+            \n\
+            VCPKG_ROOT environment variable is not set and Homebrew fallback is only\n\
+            available for macOS ARM64 (Apple Silicon).\n\
+            \n\
+            To fix this issue, you need to install the required C/C++ libraries:\n\
+            \n\
+            Option 1: Use vcpkg (Recommended for all platforms)\n\
+            ───────────────────────────────────────────────────────\n\
+            1. Install vcpkg:\n\
+               git clone https://github.com/microsoft/vcpkg\n\
+               cd vcpkg\n\
+               ./bootstrap-vcpkg.sh     # Linux/macOS\n\
+               .\\bootstrap-vcpkg.bat   # Windows\n\
+            \n\
+            2. Set the VCPKG_ROOT environment variable:\n\
+               export VCPKG_ROOT=$HOME/vcpkg     # Linux/macOS\n\
+               set VCPKG_ROOT=C:\\vcpkg          # Windows\n\
+            \n\
+            3. Install the required packages:\n\
+               $VCPKG_ROOT/vcpkg install libvpx libyuv opus aom\n\
+            \n\
+            4. Re-run the build\n\
+            \n\
+            Option 2: Use system package manager (Linux only)\n\
+            ──────────────────────────────────────────────────\n\
+            Install development packages using your system package manager:\n\
+            - Ubuntu/Debian: sudo apt install libopus-dev libyuv-dev libvpx-dev libaom-dev\n\
+            - Fedora: sudo dnf install opus-devel libyuv-devel libvpx-devel libaom-devel\n\
+            - Arch: sudo pacman -S opus libyuv libvpx aom\n\
+            \n\
+            Then build with the linux-pkg-config feature:\n\
+               cargo build --features linux-pkg-config\n\
+            \n\
+            For more information, see the README.md file.\n\
+            ════════════════════════════════════════════════════════════════════════════════\n"
+        );
     }
     let mut path = PathBuf::from("/opt/homebrew/Cellar");
     path.push(name);
     let entries = if let Ok(dir) = std::fs::read_dir(&path) {
         dir
     } else {
-        panic!("Could not find package in {}. Make sure your homebrew and package {} are all installed.", path.to_str().unwrap(),&name);
+        panic!(
+            "\n\n\
+            ════════════════════════════════════════════════════════════════════════════════\n\
+            Build Error: Homebrew Package Not Found\n\
+            ════════════════════════════════════════════════════════════════════════════════\n\
+            \n\
+            Could not find package '{}' in {}.\n\
+            \n\
+            This build requires C/C++ libraries to be installed. Please choose one option:\n\
+            \n\
+            Option 1: Install via Homebrew (macOS)\n\
+            ───────────────────────────────────────\n\
+            1. Make sure Homebrew is installed: https://brew.sh\n\
+            2. Install the required package:\n\
+               brew install {}\n\
+            3. Re-run the build\n\
+            \n\
+            Option 2: Use vcpkg (Recommended, works on all platforms)\n\
+            ──────────────────────────────────────────────────────────\n\
+            1. Install vcpkg:\n\
+               git clone https://github.com/microsoft/vcpkg\n\
+               cd vcpkg && ./bootstrap-vcpkg.sh\n\
+            \n\
+            2. Set the VCPKG_ROOT environment variable:\n\
+               export VCPKG_ROOT=$HOME/vcpkg\n\
+            \n\
+            3. Install the required packages:\n\
+               $VCPKG_ROOT/vcpkg install libvpx libyuv opus aom\n\
+            \n\
+            4. Re-run the build\n\
+            \n\
+            For more information, see the README.md file.\n\
+            ════════════════════════════════════════════════════════════════════════════════\n",
+            name,
+            path.to_str().unwrap(),
+            name
+        );
     };
     let mut directories = entries
         .into_iter()
@@ -98,8 +174,33 @@ fn link_homebrew_m1(name: &str) -> PathBuf {
     directories.sort_unstable();
     if directories.is_empty() {
         panic!(
-            "There's no installed version of {} in /opt/homebrew/Cellar",
-            name
+            "\n\n\
+            ════════════════════════════════════════════════════════════════════════════════\n\
+            Build Error: No Homebrew Package Version Found\n\
+            ════════════════════════════════════════════════════════════════════════════════\n\
+            \n\
+            There's no installed version of '{}' in /opt/homebrew/Cellar.\n\
+            The package directory exists but is empty.\n\
+            \n\
+            To fix this issue:\n\
+            \n\
+            1. Install the package via Homebrew:\n\
+               brew install {}\n\
+            \n\
+            2. Verify the installation:\n\
+               brew list {} --versions\n\
+            \n\
+            3. Re-run the build\n\
+            \n\
+            Alternatively, use vcpkg instead of Homebrew:\n\
+            1. Install vcpkg: git clone https://github.com/microsoft/vcpkg && cd vcpkg && ./bootstrap-vcpkg.sh\n\
+            2. Set VCPKG_ROOT: export VCPKG_ROOT=$HOME/vcpkg\n\
+            3. Install packages: $VCPKG_ROOT/vcpkg install libvpx libyuv opus aom\n\
+            4. Re-run the build\n\
+            \n\
+            For more information, see the README.md file.\n\
+            ════════════════════════════════════════════════════════════════════════════════\n",
+            name, name, name
         );
     }
     path.push(directories.pop().unwrap());

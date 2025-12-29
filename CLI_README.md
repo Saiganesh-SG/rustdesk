@@ -18,6 +18,55 @@ A command-line interface for RustDesk that allows remote system control without 
 
 - Rust toolchain (1.75 or higher)
 - Git with submodules initialized
+- **Required C/C++ libraries**: opus, libyuv, libvpx, aom
+
+### Installing Dependencies
+
+#### Option 1: vcpkg (Recommended for all platforms)
+
+vcpkg provides a consistent way to install C/C++ dependencies across all platforms:
+
+```bash
+# Install vcpkg
+git clone https://github.com/microsoft/vcpkg
+cd vcpkg
+./bootstrap-vcpkg.sh      # Linux/macOS
+# OR
+.\bootstrap-vcpkg.bat     # Windows
+
+# Set environment variable
+export VCPKG_ROOT=$HOME/vcpkg      # Linux/macOS
+# OR
+set VCPKG_ROOT=C:\vcpkg            # Windows
+
+# Install required packages
+$VCPKG_ROOT/vcpkg install libvpx libyuv opus aom
+```
+
+#### Option 2: System Package Manager
+
+**macOS (Homebrew):**
+```bash
+brew install opus libyuv libvpx aom
+```
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt install libopus-dev libyuv-dev libvpx-dev libaom-dev
+# Then build with: cargo build --bin rustdeskcli --release --features linux-pkg-config
+```
+
+**Linux (Fedora):**
+```bash
+sudo dnf install opus-devel libyuv-devel libvpx-devel libaom-devel
+# Then build with: cargo build --bin rustdeskcli --release --features linux-pkg-config
+```
+
+**Linux (Arch):**
+```bash
+sudo pacman -S opus libyuv libvpx aom
+# Then build with: cargo build --bin rustdeskcli --release --features linux-pkg-config
+```
 
 ### Linux
 
@@ -28,8 +77,12 @@ cd rustdesk
 git checkout feature/cli-version
 git submodule update --init --recursive
 
+# Install dependencies (choose one option from above)
+
 # Build the CLI binary
 cargo build --bin rustdeskcli --release
+# OR with system packages:
+# cargo build --bin rustdeskcli --release --features linux-pkg-config
 
 # The binary will be at: target/release/rustdeskcli
 ```
@@ -42,6 +95,10 @@ git clone https://github.com/Saiganesh-SG/rustdesk.git
 cd rustdesk
 git checkout feature/cli-version
 git submodule update --init --recursive
+
+# Install dependencies (choose one option from above)
+# For example with Homebrew:
+brew install opus libyuv libvpx aom
 
 # Build the CLI binary
 cargo build --bin rustdeskcli --release
@@ -58,11 +115,30 @@ cd rustdesk
 git checkout feature/cli-version
 git submodule update --init --recursive
 
+# Install dependencies with vcpkg (see instructions above)
+# Set VCPKG_ROOT environment variable first
+
 # Build the CLI binary
 cargo build --bin rustdeskcli --release
 
 # The binary will be at: target\release\rustdeskcli.exe
 ```
+
+### Using the Build Script
+
+For convenience, you can use the provided build scripts that include dependency checking:
+
+**Linux/macOS:**
+```bash
+./build_cli.sh
+```
+
+**Windows:**
+```cmd
+build_cli.bat
+```
+
+These scripts will check for required dependencies and provide helpful error messages if anything is missing.
 
 ## Usage
 
@@ -192,11 +268,67 @@ If you encounter connection issues:
 
 ### Build Issues
 
-If the build fails:
+#### Missing C/C++ Dependencies
 
-1. Ensure all git submodules are initialized: `git submodule update --init --recursive`
-2. Update Rust toolchain: `rustup update`
-3. Check that required system dependencies are installed
+If the build fails with errors about missing opus, libyuv, libvpx, or aom:
+
+**Error Example:**
+```
+Could not find package in /opt/homebrew/Cellar/opus
+```
+
+**Solution:**
+1. Install dependencies using one of the methods described in the "Installing Dependencies" section above
+2. Either set `VCPKG_ROOT` environment variable if using vcpkg, or install packages via Homebrew/system package manager
+3. Re-run the build
+
+**For macOS users:**
+```bash
+# Option 1: Install with Homebrew
+brew install opus libyuv libvpx aom
+
+# Option 2: Use vcpkg
+export VCPKG_ROOT=$HOME/vcpkg
+$VCPKG_ROOT/vcpkg install libvpx libyuv opus aom
+```
+
+**For Linux users:**
+```bash
+# Option 1: Use system package manager (Ubuntu/Debian example)
+sudo apt install libopus-dev libyuv-dev libvpx-dev libaom-dev
+cargo build --bin rustdeskcli --release --features linux-pkg-config
+
+# Option 2: Use vcpkg
+export VCPKG_ROOT=$HOME/vcpkg
+$VCPKG_ROOT/vcpkg install libvpx libyuv opus aom
+cargo build --bin rustdeskcli --release
+```
+
+#### Git Submodules Not Initialized
+
+If the build fails with missing submodule errors:
+
+```bash
+git submodule update --init --recursive
+```
+
+#### Outdated Rust Toolchain
+
+If you encounter Rust compilation errors:
+
+```bash
+rustup update
+```
+
+#### Platform-Specific Issues
+
+**macOS ARM64 (Apple Silicon):**
+- Homebrew packages are installed in `/opt/homebrew/Cellar/`
+- Make sure you're using ARM64 Homebrew, not x86_64
+
+**Windows:**
+- vcpkg is strongly recommended for Windows
+- Ensure Visual Studio Build Tools are installed
 
 ## Future Enhancements
 
