@@ -83,7 +83,12 @@ fn main() {
             log::info!("Using relay server: {}", relay);
         }
 
-        match cli_controller::connect(
+        println!("\n=== RustDesk CLI - Interactive Terminal ===");
+        println!("Connecting to remote system...");
+        println!("Once connected, you can type commands directly.");
+        println!("Type 'exit' or 'quit' to close the connection.\n");
+
+        match cli_controller::connect_interactive(
             remote_id,
             id_server,
             relay_server,

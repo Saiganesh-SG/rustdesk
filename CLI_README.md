@@ -5,9 +5,12 @@ A command-line interface for RustDesk that allows remote system control without 
 ## Features
 
 - Connect to remote systems via command line
-- Execute commands on remote terminals
+- Interactive terminal access to remote systems
+- Execute commands and view output in real-time
 - Support for custom ID and relay servers
+- Secure authentication with password prompts
 - Minimal dependencies for server environments
+- Cross-platform support (Linux, macOS, Windows)
 
 ## Building
 
@@ -63,9 +66,9 @@ cargo build --bin rustdeskcli --release
 
 ## Usage
 
-### Connecting to a Remote System
+### Connecting to a Remote System with Interactive Terminal
 
-To establish a connection to a remote system:
+To establish an interactive terminal session with a remote system:
 
 ```bash
 ./rustdeskcli --remoteId 227628712 \
@@ -75,29 +78,67 @@ To establish a connection to a remote system:
 ```
 
 Parameters:
-- `--remoteId`: The ID of the remote system to connect to
+- `--remoteId`: The ID of the remote system to connect to (required)
 - `--idServer`: The ID/Rendezvous server address (optional)
 - `--relayServer`: The relay server address (optional)
-- `--key`: Server public key for authentication (optional)
+- `--key`: Server public key for authentication (optional, defaults to empty)
 - `--password`: Password for authentication (optional, will prompt if not provided)
 
-### Executing Commands
+### Interactive Terminal Mode
 
-After establishing a connection, you can execute commands:
+Once connected, you'll be in an interactive terminal where you can:
+
+1. Type commands directly (e.g., `ls -la`, `pwd`, `whoami`)
+2. View command output in real-time
+3. Execute multiple commands sequentially
+4. Type `exit` or `quit` to close the connection
+
+Example session:
+```bash
+$ ./rustdeskcli --remoteId 227628712 --idServer 35.222.12.44 --key mykey
+
+=== RustDesk CLI - Interactive Terminal ===
+Connecting to remote system...
+Once connected, you can type commands directly.
+Type 'exit' or 'quit' to close the connection.
+
+Connected successfully! (direct: true)
+Login successful!
+
+$ ls -la
+total 48
+drwxr-xr-x 5 user user 4096 Dec 29 08:00 .
+drwxr-xr-x 3 user user 4096 Dec 29 07:55 ..
+-rw-r--r-- 1 user user  220 Dec 29 07:55 .bash_logout
+
+$ pwd
+/home/user
+
+$ exit
+Connection closed successfully
+```
+
+### Single Command Execution (Future Feature)
+
+Execute a single command without maintaining an interactive session:
 
 ```bash
 ./rustdeskcli --command "ls -la"
 ```
 
-**Note**: Command execution requires an active connection session. The full remote terminal integration is planned for future releases.
+**Note**: This feature is currently limited. For now, use the interactive terminal mode for command execution.
 
 ## Architecture
 
 ### Components
 
 1. **CliSession**: Implements the `Interface` trait for handling CLI-specific interactions
+   - Manages connection state
+   - Handles terminal open/close operations
+   - Sends terminal input to remote system
 2. **Connection Manager**: Handles establishing and maintaining connections to remote systems
-3. **Command Executor**: Processes commands and returns output (in development)
+3. **Interactive Terminal**: Provides real-time command execution with output streaming
+4. **Message Handler**: Processes messages from remote system including terminal output
 
 ### Connection Flow
 
@@ -105,7 +146,10 @@ After establishing a connection, you can execute commands:
 2. Initialize RustDesk client with specified parameters
 3. Establish connection using `Client::start()`
 4. Handle authentication (password prompt if needed)
-5. Maintain session for command execution
+5. Open remote terminal session
+6. Start interactive input loop
+7. Send commands and display output in real-time
+8. Maintain session until user exits
 
 ## Development
 
@@ -129,8 +173,10 @@ The CLI controller is built on top of the existing RustDesk client infrastructur
 
 ## Limitations
 
-- Currently supports connection establishment and basic authentication
-- Full terminal command execution is under development
+- Terminal size is fixed at 24 rows x 80 columns (resizing not yet implemented)
+- No support for advanced terminal control sequences (colors, cursor positioning, etc.)
+- Single-command execution mode requires session persistence (planned)
+- File transfer not available in CLI mode
 - Requires network access to rendezvous and relay servers
 
 ## Troubleshooting
@@ -154,12 +200,17 @@ If the build fails:
 
 ## Future Enhancements
 
-- [ ] Complete terminal command execution implementation
-- [ ] Session persistence for multiple commands
+- [x] Complete terminal command execution implementation
+- [x] Interactive shell mode
+- [ ] Terminal resizing support
+- [ ] Better terminal emulation with control sequence handling
+- [ ] Session persistence for single-command execution
 - [ ] File transfer support via CLI
 - [ ] Configuration file support
-- [ ] Interactive shell mode
 - [ ] Command history and autocomplete
+- [ ] Multi-session support (connect to multiple systems simultaneously)
+- [ ] Tab completion for remote filesystem
+- [ ] Support for terminal colors and formatting
 
 ## Contributing
 
