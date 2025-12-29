@@ -12,7 +12,7 @@ use objc::{
     declare::ClassDecl,
     msg_send,
     runtime::{Object, Sel, BOOL},
-    sel, sel_impl,
+    sel,
 };
 use sciter::{make_args, Host};
 

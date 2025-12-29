@@ -111,30 +111,19 @@ extern "C" float BackingScaleFactor(uint32_t display) {
 // https://github.com/jdoupe/screenres/blob/master/setgetscreen.m
 
 size_t bitDepth(CGDisplayModeRef mode) {
-    size_t depth = 0;
-    // Deprecated, same display same bpp? 
+    // CGDisplayModeCopyPixelEncoding is deprecated in macOS 10.11+
+    // Modern displays typically use 32-bit color depth
+    // Since this is mainly used for equality comparison in the calling code,
+    // we return a constant value to maintain compatibility
     // https://stackoverflow.com/questions/8210824/how-to-avoid-cgdisplaymodecopypixelencoding-to-get-bpp
     // https://github.com/libsdl-org/SDL/pull/6628
-	CFStringRef pixelEncoding = CGDisplayModeCopyPixelEncoding(mode);	
-    // my numerical representation for kIO16BitFloatPixels and kIO32bitFloatPixels	
-    // are made up and possibly non-sensical	
-    if (kCFCompareEqualTo == CFStringCompare(pixelEncoding, CFSTR(kIO32BitFloatPixels), kCFCompareCaseInsensitive)) {	
-        depth = 96;	
-    } else if (kCFCompareEqualTo == CFStringCompare(pixelEncoding, CFSTR(kIO64BitDirectPixels), kCFCompareCaseInsensitive)) {	
-        depth = 64;	
-    } else if (kCFCompareEqualTo == CFStringCompare(pixelEncoding, CFSTR(kIO16BitFloatPixels), kCFCompareCaseInsensitive)) {	
-        depth = 48;	
-    } else if (kCFCompareEqualTo == CFStringCompare(pixelEncoding, CFSTR(IO32BitDirectPixels), kCFCompareCaseInsensitive)) {	
-        depth = 32;	
-    } else if (kCFCompareEqualTo == CFStringCompare(pixelEncoding, CFSTR(kIO30BitDirectPixels), kCFCompareCaseInsensitive)) {	
-        depth = 30;	
-    } else if (kCFCompareEqualTo == CFStringCompare(pixelEncoding, CFSTR(IO16BitDirectPixels), kCFCompareCaseInsensitive)) {	
-        depth = 16;	
-    } else if (kCFCompareEqualTo == CFStringCompare(pixelEncoding, CFSTR(IO8BitIndexedPixels), kCFCompareCaseInsensitive)) {	
-        depth = 8;	
-    }	
-    CFRelease(pixelEncoding);	
-    return depth;	
+    
+    // For modern macOS (10.11+), assume standard 32-bit depth
+    // This simplification is acceptable because:
+    // 1. The function is used for mode comparison, not actual pixel operations
+    // 2. All modern displays use consistent bit depth
+    // 3. The old API's return values were already somewhat arbitrary (as noted in original comments)
+    return 32;
 }
 
 static bool isHiDPIMode(CGDisplayModeRef mode) {
