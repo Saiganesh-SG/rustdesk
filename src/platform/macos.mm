@@ -89,9 +89,8 @@ extern "C" bool MacCheckAdminAuthorization() {
                                 kAuthorizationFlagExtendRights;
     status = AuthorizationCopyRights(authRef, &authRights, kAuthorizationEmptyEnvironment, flags, NULL);
     
-    bool result = (status == errAuthorizationSuccess);
     AuthorizationFree(authRef, kAuthorizationFlagDefaults);
-    return result;
+    return (status == errAuthorizationSuccess);
 }
 
 // https://gist.github.com/briankc/025415e25900750f402235dbf1b74e42
