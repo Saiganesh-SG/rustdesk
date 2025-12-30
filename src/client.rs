@@ -2555,7 +2555,7 @@ impl LoginConfigHandler {
                 && !self.password_source.is_shared_ab(&password, &hash)
                 && !self.password_source.is_personal_ab(&password)
             {
-                let hash = base64::encode(config.password.clone(), base64::Variant::Original);
+                let hash = base64::encode(&config.password, base64::Variant::Original);
                 let evt: HashMap<&str, String> = HashMap::from([
                     ("name", "sync_peer_hash_password_to_personal_ab".to_string()),
                     ("id", self.id.clone()),

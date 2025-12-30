@@ -248,7 +248,7 @@ pub async fn connect(
                                 let mut msg_out = Message::new();
                                 let mut lr = LoginRequest {
                                     username: os_username.clone(),
-                                    password: password.into_bytes(),
+                                    password: password.into_bytes().into(),
                                     ..Default::default()
                                 };
                                 msg_out.set_login_request(lr);
@@ -426,7 +426,7 @@ pub async fn connect_interactive(
                                 let mut msg_out = Message::new();
                                 let mut lr = LoginRequest {
                                     username: os_username.clone(),
-                                    password: password.into_bytes(),
+                                    password: password.into_bytes().into(),
                                     ..Default::default()
                                 };
                                 msg_out.set_login_request(lr);

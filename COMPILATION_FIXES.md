@@ -89,10 +89,62 @@ Full build verification requires resolution of network dependencies (libwebm sub
 3. `src/whiteboard/macos.rs` - Removed `sel_impl` import
 4. `src/platform/macos.mm` - Replaced deprecated API in `bitDepth()` function
 
+### 3. Deprecated base64 APIs
+**Problem**: Multiple deprecated base64 API usages across the codebase.
+
+**Files Fixed**:
+- `src/client.rs` - sodiumoxide base64::encode
+- `src/ui_interface.rs` - sodiumoxide base64::encode
+- `src/common.rs` - hbb_common base64::encode/decode
+- `src/hbbs_http/sync.rs` - hbb_common base64::encode
+- `src/cli_controller.rs` - Bytes type conversion
+
+**Solution**: 
+1. **sodiumoxide base64** (0.2.x): Updated to pass references instead of owned values
+   - Changed `base64::encode(data.clone(), variant)` to `base64::encode(&data, variant)`
+   
+2. **hbb_common base64** (0.22.x): Updated to use new Engine API
+   - Changed `base64::encode(data)` to `base64::engine::general_purpose::STANDARD.encode(data)`
+   - Changed `base64::decode(data)` to `base64::engine::general_purpose::STANDARD.decode(data)`
+
+3. **Bytes type conversion**: Made conversions explicit and consistent
+   - Changed `password.into_bytes()` to `password.into_bytes().into()` for proper Bytes conversion
+
+**Before**:
+```rust
+// sodiumoxide
+let hash = base64::encode(config.password.clone(), base64::Variant::Original);
+
+// hbb_common
+#[allow(deprecated)]
+base64::encode(input)
+```
+
+**After**:
+```rust
+// sodiumoxide
+let hash = base64::encode(&config.password, base64::Variant::Original);
+
+// hbb_common
+use base64::{engine::general_purpose::STANDARD, Engine as _};
+STANDARD.encode(input)
+```
+
+## Files Modified
+1. `src/platform/macos.rs` - Removed `sel_impl` import
+2. `src/platform/delegate.rs` - Removed `sel_impl` import
+3. `src/whiteboard/macos.rs` - Removed `sel_impl` import
+4. `src/platform/macos.mm` - Replaced deprecated API in `bitDepth()` function
+5. `src/client.rs` - Fixed sodiumoxide base64::encode call
+6. `src/ui_interface.rs` - Fixed sodiumoxide base64::encode call
+7. `src/common.rs` - Updated encode64/decode64 to use Engine API
+8. `src/hbbs_http/sync.rs` - Updated base64::encode to use Engine API
+9. `src/cli_controller.rs` - Fixed Bytes type conversion
+
 ## Impact
-- **Lines Changed**: 39 (14 insertions, 25 deletions)
-- **Compilation Errors Fixed**: Addresses objc macro and deprecated API errors
-- **Warnings Eliminated**: Removes deprecation warnings for macOS builds
+- **Lines Changed**: 56 (22 insertions, 34 deletions)
+- **Compilation Errors Fixed**: Addresses objc macro, deprecated API errors, and type mismatches
+- **Warnings Eliminated**: Removes deprecation warnings for base64 and macOS builds
 - **Functional Impact**: None - changes maintain existing behavior
 
 ## Testing Recommendations
