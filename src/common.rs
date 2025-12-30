@@ -1480,14 +1480,14 @@ pub fn handle_url_scheme(url: String) {
 
 #[inline]
 pub fn encode64<T: AsRef<[u8]>>(input: T) -> String {
-    #[allow(deprecated)]
-    base64::encode(input)
+    use base64::{engine::general_purpose::STANDARD, Engine as _};
+    STANDARD.encode(input)
 }
 
 #[inline]
 pub fn decode64<T: AsRef<[u8]>>(input: T) -> Result<Vec<u8>, base64::DecodeError> {
-    #[allow(deprecated)]
-    base64::decode(input)
+    use base64::{engine::general_purpose::STANDARD, Engine as _};
+    STANDARD.decode(input)
 }
 
 pub async fn get_key(sync: bool) -> String {

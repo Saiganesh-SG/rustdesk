@@ -740,7 +740,7 @@ pub fn peer_to_map(id: String, p: PeerConfig) -> HashMap<&'static str, String> {
         ),
         (
             "hash",
-            base64::encode(p.password, base64::Variant::Original),
+            base64::encode(&p.password, base64::Variant::Original),
         ),
     ])
 }
